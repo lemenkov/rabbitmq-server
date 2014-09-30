@@ -378,7 +378,8 @@ stop() ->
         _         -> await_startup()
     end,
     rabbit_log:info("Stopping RabbitMQ~n"),
-    ok = app_utils:stop_applications(app_shutdown_order()).
+    ok = app_utils:stop_applications(app_shutdown_order()),
+    rabbit_log:info("Stopped RabbitMQ application~n").
 
 stop_and_halt() ->
     try
