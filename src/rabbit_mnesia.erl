@@ -26,6 +26,7 @@
 
          status/0,
          is_clustered/0,
+         on_running_node/1,
          cluster_nodes/1,
          node_type/0,
          dir/0,
@@ -69,6 +70,7 @@
                          {'running_nodes', [node()]} |
                          {'partitions', [{node(), [node()]}]}]).
 -spec(is_clustered/0 :: () -> boolean()).
+-spec(on_running_node/1 :: (pid()) -> boolean()).
 -spec(cluster_nodes/1 :: ('all' | 'disc' | 'ram' | 'running') -> [node()]).
 -spec(node_type/0 :: () -> node_type()).
 -spec(dir/0 :: () -> file:filename()).
@@ -330,6 +332,8 @@ is_running() -> mnesia:system_info(is_running) =:= yes.
 
 is_clustered() -> AllNodes = cluster_nodes(all),
                   AllNodes =/= [] andalso AllNodes =/= [node()].
+
+on_running_node(Pid) -> lists:member(node(Pid), cluster_nodes(running)).
 
 cluster_nodes(WhichNodes) -> cluster_status(WhichNodes).
 
