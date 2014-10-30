@@ -34,7 +34,7 @@
          {default_user_tags, [administrator]},
          {default_vhost, <<"/">>},
          {default_permissions, [<<".*">>, <<".*">>, <<".*">>]},
-         {loopback_users, [<<"guest">>]},
+         {loopback_users, []},
          {cluster_nodes, {[], disc}},
          {server_properties, []},
          {collect_statistics, none},
