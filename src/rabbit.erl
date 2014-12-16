@@ -314,6 +314,8 @@ start() ->
                      rabbit_mnesia:check_cluster_consistency(),
                      ok = app_utils:start_applications(
                             app_startup_order(), fun handle_app_error/2),
+                     {module, sd_notify} == code:load_file(sd_notify) andalso
+                         sd_notify:sd_notify(0, "READY=1"),
                      ok = log_broker_started(rabbit_plugins:active())
              end).
 
@@ -336,6 +338,8 @@ boot() ->
                                                                   false),
                      ok = app_utils:start_applications(
                             StartupApps, fun handle_app_error/2),
+                     {module, sd_notify} == code:load_file(sd_notify) andalso
+                         sd_notify:sd_notify(0, "READY=1"),
                      ok = log_broker_started(Plugins)
              end).
 
