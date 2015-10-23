@@ -96,7 +96,8 @@
          close_connection,
          {trace_on, [?VHOST_DEF]},
          {trace_off, [?VHOST_DEF]},
-         set_vm_memory_high_watermark
+         set_vm_memory_high_watermark,
+         help
         ]).
 
 -define(GLOBAL_QUERIES,
@@ -550,7 +551,10 @@ action(eval, Node, [Expr], _Opts, _Inform) ->
             end;
         {error, E, _} ->
             {error_string, format_parse_error(E)}
-    end.
+    end;
+
+action(help, _Node, _Args, _Opts, _Inform) ->
+    io:format("~s", [rabbit_ctl_usage:usage()]).
 
 format_parse_error({_Line, Mod, Err}) -> lists:flatten(Mod:format_error(Err)).
 

@@ -34,7 +34,8 @@
 -define(COMMANDS,
         [{list, [?VERBOSE_DEF, ?MINIMAL_DEF, ?ENABLED_DEF, ?ENABLED_ALL_DEF]},
          enable,
-         disable]).
+         disable,
+         help]).
 
 %%----------------------------------------------------------------------------
 
@@ -155,7 +156,10 @@ action(disable, ToDisable0, _Opts, PluginsFile, PluginsDir) ->
                             ImplicitlyEnabled -- NewImplicitlyEnabled),
                  write_enabled_plugins(PluginsFile, NewEnabled),
                  report_change()
-    end.
+    end;
+
+action(help, _Args, _Opts, _PluginsFile, _PluginsDir) ->
+    io:format("~s", [rabbit_plugins_usage:usage()]).
 
 %%----------------------------------------------------------------------------
 
