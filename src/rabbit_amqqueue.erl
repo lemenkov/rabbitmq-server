@@ -364,6 +364,11 @@ not_found_or_absent_dirty(Name) ->
     end.
 
 with(Name, F, E) ->
+    with(Name, F, E, 1000).
+
+with(_Name, _F, E, 0) ->
+    E(infinite_loop_detected);
+with(Name, F, E, RetriesLeft) ->
     case lookup(Name) of
         {ok, Q = #amqqueue{pid = QPid}} ->
             %% We check is_process_alive(QPid) in case we receive a
@@ -375,7 +380,7 @@ with(Name, F, E) ->
             rabbit_misc:with_exit_handler(
               fun () -> false = rabbit_misc:is_process_alive(QPid),
                         timer:sleep(25),
-                        with(Name, F, E)
+                        with(Name, F, E, RetriesLeft - 1)
               end, fun () -> F(Q) end);
         {error, not_found} ->
             E(not_found_or_absent_dirty(Name))
