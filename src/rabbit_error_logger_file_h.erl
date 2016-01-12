@@ -34,7 +34,10 @@
 %% lib/stdlib/src/error_logger_file_h.erl from R14B3 was copied as
 %% init_file/2 and changed so that it opens the file in 'append' mode.
 
-%% Used only when swapping handlers in log rotation
+%% Log rotation with empty suffix should result only in file re-opening.
+init({{File, ""}, _}) ->
+    init(File);
+%% Used only when swapping handlers in log rotation, pre OTP 18.1
 init({{File, Suffix}, []}) ->
     case rabbit_file:append_file(File, Suffix) of
         ok -> file:delete(File),

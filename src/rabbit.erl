@@ -450,9 +450,14 @@ environment() ->
     lists:keysort(1, [P || P = {K, _} <- application:get_all_env(rabbit),
                            K =/= default_pass]).
 
+rotate_logs_info("") ->
+    rabbit_misc:local_info_msg("Reopening logs", []);
+rotate_logs_info(Suffix) ->
+    rabbit_misc:local_info_msg("Rotating logs with suffix '~s'~n", [Suffix]).
+
 rotate_logs(BinarySuffix) ->
     Suffix = binary_to_list(BinarySuffix),
-    rabbit_misc:local_info_msg("Rotating logs with suffix '~s'~n", [Suffix]),
+    rotate_logs_info(Suffix),
     log_rotation_result(rotate_logs(log_location(kernel),
                                     Suffix,
                                     rabbit_error_logger_file_h),
