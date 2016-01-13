@@ -548,7 +548,7 @@ wait_for_channel_termination(0, TimerRef, State) ->
                  end;
         _     -> State
     end;
-wait_for_channel_termination(N, TimerRef, State) ->
+wait_for_channel_termination(N, TimerRef, State = #v1{sock = Sock}) ->
     receive
         {'DOWN', _MRef, process, ChPid, Reason} ->
             {Channel, State1} = channel_cleanup(ChPid, State),
@@ -564,6 +564,9 @@ wait_for_channel_termination(N, TimerRef, State) ->
                                      wait_for_channel_termination(
                                        N-1, TimerRef, State1)
             end;
+        {'EXIT', Sock, _Reason} ->
+            [channel_cleanup(ChPid, State) || ChPid <- all_channels()],
+            exit(normal);
         cancel_wait ->
             exit(channel_termination_timeout)
     end.
