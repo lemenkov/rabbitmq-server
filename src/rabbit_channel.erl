@@ -224,6 +224,7 @@ init([Channel, ReaderPid, WriterPid, ConnPid, ConnName, Protocol, User, VHost,
     rabbit_event:notify(channel_created, infos(?CREATION_EVENT_KEYS, State1)),
     rabbit_event:if_enabled(State1, #ch.stats_timer,
                             fun() -> emit_stats(State1) end),
+    put(channel_operation_timeout, ?CHANNEL_OPERATION_TIMEOUT),
     {ok, State1, hibernate,
      {backoff, ?HIBERNATE_AFTER_MIN, ?HIBERNATE_AFTER_MIN, ?DESIRED_HIBERNATE}}.
 
@@ -635,7 +636,7 @@ handle_method(_Method, _, State = #ch{state = closing}) ->
     {noreply, State};
 
 handle_method(#'channel.close'{}, _, State = #ch{reader_pid = ReaderPid}) ->
-    {ok, State1} = notify_queues(State),
+    {_Result, State1} = notify_queues(State),
     %% We issue the channel.close_ok response after a handshake with
     %% the reader, the other half of which is ready_for_close. That
     %% way the reader forgets about the channel before we send the
@@ -1446,7 +1447,9 @@ notify_queues(State = #ch{consumer_mapping  = Consumers,
                           delivering_queues = DQ }) ->
     QPids = sets:to_list(
               sets:union(sets:from_list(consumer_queues(Consumers)), DQ)),
-    {rabbit_amqqueue:notify_down_all(QPids, self()), State#ch{state = closing}}.
+    {rabbit_amqqueue:notify_down_all(QPids, self(),
+                                     get(channel_operation_timeout)),
+     State#ch{state = closing}}.
 
 foreach_per_queue(_F, []) ->
     ok;

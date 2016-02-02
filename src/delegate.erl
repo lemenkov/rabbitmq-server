@@ -19,7 +19,7 @@
 -behaviour(gen_server2).
 
 -export([start_link/1, invoke_no_result/2, invoke/2,
-         monitor/2, demonitor/1, call/2, cast/2]).
+         monitor/2, demonitor/1, call/2, call/3, cast/2]).
 
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
          terminate/2, code_change/3]).
@@ -47,6 +47,9 @@
 -spec(call/2 ::
         ( pid(),  any()) -> any();
         ([pid()], any()) -> {[{pid(), any()}], [{pid(), term()}]}).
+-spec(call/3 ::
+        ( pid(),  any(), non_neg_integer()) -> any();
+        ([pid()], any(), non_neg_integer()) -> {[{pid(), any()}], [{pid(), term()}]}).
 -spec(cast/2 :: (pid() | [pid()], any()) -> 'ok').
 
 -endif.
@@ -137,6 +140,9 @@ demonitor({Name, Pid}) ->
 
 call(PidOrPids, Msg) ->
     invoke(PidOrPids, {gen_server2, call, [Msg, infinity]}).
+
+call(PidOrPids, Msg, Timeout) ->
+    invoke(PidOrPids, {gen_server2, call, [Msg, Timeout]}).
 
 cast(PidOrPids, Msg) ->
     invoke_no_result(PidOrPids, {gen_server2, cast, [Msg]}).
