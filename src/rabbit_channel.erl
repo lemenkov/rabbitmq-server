@@ -1448,7 +1448,7 @@ notify_queues(State = #ch{consumer_mapping  = Consumers,
     QPids = sets:to_list(
               sets:union(sets:from_list(consumer_queues(Consumers)), DQ)),
     {rabbit_amqqueue:notify_down_all(QPids, self(),
-                                     get(channel_termination_timeout)),
+                                     get(channel_operation_timeout)),
      State#ch{state = closing}}.
 
 foreach_per_queue(_F, []) ->
