@@ -71,6 +71,7 @@
 -export([get_parent/0]).
 -export([store_proc_name/1, store_proc_name/2]).
 -export([moving_average/4]).
+-export([get_channel_operation_timeout/0]).
 
 %% Horrible macro to use in guards
 -define(IS_BENIGN_EXIT(R),
@@ -250,6 +251,7 @@
 -spec(store_proc_name/1 :: (rabbit_types:proc_type_and_name()) -> ok).
 -spec(moving_average/4 :: (float(), float(), float(), float() | 'undefined')
                           -> float()).
+-spec(get_channel_operation_timeout/0 :: () -> non_neg_integer()).
 -endif.
 
 %%----------------------------------------------------------------------------
@@ -1079,6 +1081,10 @@ moving_average(_Time, _HalfLife, Next, undefined) ->
 moving_average(Time,  HalfLife,  Next, Current) ->
     Weight = math:exp(Time * math:log(0.5) / HalfLife),
     Next * (1 - Weight) + Current * Weight.
+
+get_channel_operation_timeout() ->
+    Default = (net_kernel:get_net_ticktime() + 10) * 1000,
+    application:get_env(rabbit, channel_operation_timeout, Default).
 
 %% -------------------------------------------------------------------------
 %% Begin copypasta from gen_server2.erl
