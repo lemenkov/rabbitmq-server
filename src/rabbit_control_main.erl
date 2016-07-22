@@ -526,7 +526,13 @@ action(list_policies, Node, [], Opts, Inform) ->
 
 action(report, Node, _Args, _Opts, Inform) ->
     Inform("Reporting server status on ~p~n~n", [erlang:universaltime()]),
-    [begin ok = action(Action, N, [], [], Inform), io:nl() end ||
+    [begin
+		case catch action(Action, N, [], [], Inform) of
+			{badrpc,nodedown} -> io:format("nodedown~n");
+			ok -> ok
+		end,
+		io:nl()
+	end ||
         N      <- unsafe_rpc(Node, rabbit_mnesia, cluster_nodes, [running]),
         Action <- [status, cluster_status, environment]],
     VHosts = unsafe_rpc(Node, rabbit_vhost, list, []),
