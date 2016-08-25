@@ -449,7 +449,7 @@ promote_backing_queue_state(QName, CPid, BQ, BQS, GM, AckTags, Seen, KS) ->
     Depth = BQ:depth(BQS1),
     true = Len == Depth, %% ASSERTION: everything must have been requeued
     ok = gm:broadcast(GM, {depth, Depth}),
-    WaitTimeout = rabbit_misc:get_env(rabbit, slave_wait_timeout, 15000),
+    WaitTimeout = application:get_env(rabbit, slave_wait_timeout, 15000),
     #state { name                = QName,
              gm                  = GM,
              coordinator         = CPid,
