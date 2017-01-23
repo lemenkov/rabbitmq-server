@@ -749,13 +749,19 @@ post_process_frame(_Frame, _ChPid, State) ->
 %% a few get it wrong - off-by 1 or 8 (empty frame size) are typical.
 -define(FRAME_SIZE_FUDGE, ?EMPTY_FRAME_SIZE).
 
-handle_input(frame_header, <<Type:8,Channel:16,PayloadSize:32, _/binary>>,
+handle_input(frame_header, <<Type:8,Channel:16,PayloadSize:32, _/binary>> = FrameData,
              State = #v1{connection = #connection{frame_max = FrameMax}})
   when FrameMax /= 0 andalso
        PayloadSize > FrameMax - ?EMPTY_FRAME_SIZE + ?FRAME_SIZE_FUDGE ->
+	case FrameData of
+		<<"AMQP", A, B, C, D, Rest/binary>> ->
+			NewState = close_connection(State),
+			{Rest, handshake({A, B, C, D}, NewState)};
+		_ ->
     fatal_frame_error(
       {frame_too_large, PayloadSize, FrameMax - ?EMPTY_FRAME_SIZE},
-      Type, Channel, <<>>, State);
+      Type, Channel, <<>>, State)
+	end;
 handle_input(frame_header, <<Type:8,Channel:16,PayloadSize:32,
                              Payload:PayloadSize/binary, ?FRAME_END,
                              Rest/binary>>,
